@@ -83,26 +83,28 @@ public class ExtensionLoader<T> {
     private static final Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-
+    //扩展类与对应的扩展类加载器缓存
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<>(64);
-
+    //扩展类与类初始化话的实例
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>(64);
 
     private final Class<?> type;
 
     private final ExtensionFactory objectFactory;
-
+    //扩展类与扩展名缓存
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<>();
-
+    //普通扩展类缓存，不包括自适应扩展类和Wrapper类
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
-
+    //扩展名与@activate的缓存
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
+    //实例化的自适应扩展对象，只能同时存在一个
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
+    //自适应扩展类缓存
     private volatile Class<?> cachedAdaptiveClass = null;
     private String cachedDefaultName;
     private volatile Throwable createAdaptiveInstanceError;
-
+    //Wrapper类缓存
     private Set<Class<?>> cachedWrapperClasses;
 
     private Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<>();

@@ -87,10 +87,11 @@ public abstract class AbstractRegistry implements Registry {
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final AtomicInteger savePropertiesRetryTimes = new AtomicInteger();
     private final Set<URL> registered = new ConcurrentHashSet<>();
+    //内存中服务缓存对象
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
     private URL registryUrl;
-    // Local disk cache file
+    // Local disk cache file 磁盘文件服务缓存对象
     private File file;
 
     public AbstractRegistry(URL url) {
@@ -214,6 +215,7 @@ public abstract class AbstractRegistry implements Registry {
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
+                //读取磁盘上的文件
                 in = new FileInputStream(file);
                 properties.load(in);
                 if (logger.isInfoEnabled()) {
@@ -450,9 +452,12 @@ public abstract class AbstractRegistry implements Registry {
             }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
+
             if (syncSaveFile) {
+                //同步保存
                 doSaveProperties(version);
             } else {
+                //异步保存，线程池，传入版本号，保证数据是最新的
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {
